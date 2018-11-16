@@ -7,19 +7,22 @@ typealias State = Set<LivingCell>
 class GameOfLifeKt(private var currentState: State = HashSet(),
                    private val history: MutableList<State> = ArrayList()) {
 
-    public fun computeNextState()
-//        : State
-    {
+    fun computeNextState(): State {
         val allDeadNeighbors = constructAllDeadNeighbors()
+        val cellsPotentiallyLivingInNextState = listOf(allDeadNeighbors, currentState).flatten()
+        val coordinateCountMap = cellsPotentiallyLivingInNextState.groupByCount()
+        return cellsPotentiallyLivingInNextState.asSequence()
+            .map { cell -> cell.computeNextState(coordinateCountMap[cell.getCoordinates()]!!) }
+            .filter { it is LivingCell }
+            .map { it as LivingCell }
+            .toSet()
     }
 
-    public fun constructAllDeadNeighbors(): List<Cell> {
-        return currentState.flatMap { cell: Cell -> constructNeighborsOf(cell) }
-    }
+    fun constructAllDeadNeighbors(): List<Cell> =
+        currentState.flatMap { cell: Cell -> constructNeighborsOf(cell) }
 
-    public fun constructNeighborsOf(cell: Cell): List<DeadCell> {
-        val x = cell.x;
-        val y = cell.y;
+    fun constructNeighborsOf(cell: Cell): List<DeadCell> {
+        val (x, y) = cell
         return listOf(
             DeadCell(x - 1, y - 1),
             DeadCell(x - 1, y),
@@ -32,10 +35,9 @@ class GameOfLifeKt(private var currentState: State = HashSet(),
         )
     }
 
-    public fun Collection<Cell>.groupByCount(): Map<Coordinates, Int> {
+    fun Collection<Cell>.groupByCount(): Map<Coordinates, Int> {
         return this.groupBy { cell -> cell.getCoordinates() }
             .map { entry -> Pair(entry.key, entry.value.size) }
             .toMap()
     }
-
 }

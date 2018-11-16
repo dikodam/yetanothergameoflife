@@ -24,8 +24,8 @@ abstract class Cell(val x: Int, val y: Int) {
         return result
     }
 
-    override fun toString(): String {
-        return "Cell(x=$x, y=$y)"
-    }
+    override fun toString(): String = "Cell(x=$x, y=$y)"
 
+    operator fun component1(): Int = x
+    operator fun component2(): Int = y
 }
